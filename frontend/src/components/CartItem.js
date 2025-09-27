@@ -1,6 +1,7 @@
-import React from 'react';
+import { useState } from 'react';
 import { PlusIcon, MinusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { useCart } from '../context/CartContext';
+import { getImageFallbackUrls } from '../utils/imageUtils';
 import './CartItem.css';
 
 /**
@@ -9,6 +10,7 @@ import './CartItem.css';
  */
 const CartItem = ({ item }) => {
   const { addItem, removeItem } = useCart();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const handleAdd = () => {
     addItem(item);
@@ -20,20 +22,25 @@ const CartItem = ({ item }) => {
 
   const itemTotal = item.price * item.quantity;
 
-  // Generate placeholder image URL
-  const imageUrl = item.image_id 
-    ? `https://picsum.photos/seed/${item.image_id}/80/80`
-    : `https://picsum.photos/seed/food-${item.id}/80/80`;
+  // Get all possible image URLs for fallback handling
+  const imageUrls = getImageFallbackUrls(item.image_id, item.id);
+
+  const handleImageError = () => {
+  // Try the next image URL in the fallback list
+  if (currentImageIndex < imageUrls.length - 1) {
+      setCurrentImageIndex(currentImageIndex + 1);
+    }
+  };
+
+  const currentImageUrl = imageUrls[currentImageIndex];
 
   return (
     <div className="cart-item">
       <div className="cart-item-image">
         <img 
-          src={imageUrl} 
+          src={currentImageUrl} 
           alt={item.name}
-          onError={(e) => {
-            e.target.src = `https://picsum.photos/seed/food-${item.id}/80/80`;
-          }}
+          onError={handleImageError}
         />
       </div>
       

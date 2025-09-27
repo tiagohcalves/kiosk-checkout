@@ -146,6 +146,8 @@
   text-align: center;
 }
 
+
+
 /* Responsive design */
 @media (max-width: 640px) {
   .menu-item {

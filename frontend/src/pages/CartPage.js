@@ -67,13 +67,9 @@ const CartPage = () => {
                 <span>Items ({cart.items.reduce((total, item) => total + item.quantity, 0)})</span>
                 <span>${cart.total.toFixed(2)}</span>
               </div>
-              <div className="summary-row">
-                <span>Tax (8.5%)</span>
-                <span>${(cart.total * 0.085).toFixed(2)}</span>
-              </div>
               <div className="summary-row summary-total">
                 <span>Total</span>
-                <span>${(cart.total * 1.085).toFixed(2)}</span>
+                <span>${(cart.total).toFixed(2)}</span>
               </div>
             </div>
 

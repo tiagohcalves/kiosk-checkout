@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer } from 'react';
+import { createContext, useContext, useReducer } from 'react';
 
 const CartContext = createContext();
 
@@ -10,8 +10,11 @@ const cartReducer = (state, action) => {
       );
       
       if (existingItemIndex >= 0) {
-        const updatedItems = [...state.items];
-        updatedItems[existingItemIndex].quantity += 1;
+        const updatedItems = state.items.map(item =>
+          item.id === action.payload.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
         return {
           ...state,
           items: updatedItems,

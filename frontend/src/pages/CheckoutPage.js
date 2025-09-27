@@ -89,7 +89,7 @@ const CheckoutPage = () => {
           item_id: item.id,
           quantity: item.quantity
         })),
-        total: parseFloat((cart.total * 1.085).toFixed(2)), // Include tax
+        total: parseFloat((cart.total).toFixed(2)),
         payment: {
           card_number: formData.cardNumber,
           card_holder_name: formData.cardHolderName,
@@ -141,9 +141,7 @@ const CheckoutPage = () => {
     );
   }
 
-  const subtotal = cart.total;
-  const tax = subtotal * 0.085;
-  const total = subtotal + tax;
+  const total = cart.total;
 
   return (
     <div className="checkout-page">
@@ -305,7 +303,7 @@ const CheckoutPage = () => {
               className="place-order-btn"
               disabled={loading}
             >
-              {loading ? <LoadingSpinner size="small" /> : `Place Order - $${total.toFixed(2)}`}
+              {loading ? <LoadingSpinner size="small" /> : `Place Order`}
             </button>
           </form>
         </div>
@@ -327,16 +325,7 @@ const CheckoutPage = () => {
                 </div>
               ))}
             </div>
-
             <div className="order-totals">
-              <div className="total-row">
-                <span>Subtotal</span>
-                <span>${subtotal.toFixed(2)}</span>
-              </div>
-              <div className="total-row">
-                <span>Tax (8.5%)</span>
-                <span>${tax.toFixed(2)}</span>
-              </div>
               <div className="total-row total-final">
                 <span>Total</span>
                 <span>${total.toFixed(2)}</span>
