@@ -14,7 +14,7 @@ class CategoryCreate(CategoryBase):
 
 class Category(CategoryBase):
     id: int
-    
+
     class Config:
         from_attributes = True
 
@@ -33,7 +33,7 @@ class ItemCreate(ItemBase):
 class Item(ItemBase):
     id: int
     category: Optional[Category] = None
-    
+
     class Config:
         from_attributes = True
 
@@ -50,7 +50,7 @@ class OrderItemCreate(OrderItemBase):
 class OrderItem(OrderItemBase):
     id: int
     item: Optional[Item] = None
-    
+
     class Config:
         from_attributes = True
 
@@ -76,7 +76,7 @@ class Order(BaseModel):
     total: float
     payment_key: str
     order_items: List[OrderItem] = []
-    
+
     class Config:
         from_attributes = True
 
