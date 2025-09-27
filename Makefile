@@ -7,7 +7,7 @@ seed:
 	cd backend && PYTHONPATH=. venv/bin/python3 checkout/repository/seed.py seed_data.json
 
 dbshell:
-	sqlite3 backend/mashgin.db
+	sqlite3 backend/db/mashgin.db
 
 run-backend:
 	cd backend && PYTHONPATH=. venv/bin/uvicorn checkout.main:app --reload

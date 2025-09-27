@@ -6,7 +6,7 @@ from checkout.models.models import Base
 
 logger = get_logger(__name__)
 
-DATABASE_URL = "sqlite:///./mashgin.db"
+DATABASE_URL = "sqlite:///./db/mashgin.db"
 
 logger.info(f"Initializing database connection to: {DATABASE_URL}")
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
