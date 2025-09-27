@@ -21,6 +21,9 @@ run-frontend:
 test-backend: venv
 	cd backend && PYTHONPATH=. pytest tests/ -v
 
+lint-backend: venv
+	cd backend && black checkout tests
+
 # Docker commands
 docker-build:
 	docker compose build

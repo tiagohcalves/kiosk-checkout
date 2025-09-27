@@ -67,11 +67,7 @@ def setup_logging(log_level: str = "INFO", log_file: str = None) -> None:
                 "propagate": False,
             },
             # Third-party loggers (reduced verbosity)
-            "uvicorn": {
-                "level": "INFO",
-                "handlers": ["console"],
-                "propagate": False,
-            },
+            "uvicorn": {"level": "INFO", "handlers": ["console"], "propagate": False,},
             "uvicorn.access": {
                 "level": "INFO",
                 "handlers": ["console"],
@@ -83,10 +79,7 @@ def setup_logging(log_level: str = "INFO", log_file: str = None) -> None:
                 "propagate": False,
             },
         },
-        "root": {
-            "level": log_level,
-            "handlers": ["console"],
-        },
+        "root": {"level": log_level, "handlers": ["console"],},
     }
 
     # Add file handler if log_file is specified
