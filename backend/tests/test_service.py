@@ -6,11 +6,14 @@ from unittest.mock import Mock, patch
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
-from checkout.service.service import (
+from checkout.service import (
     MenuService,
     OrderService,
     AdminService,
     FakePaymentService,
+    get_admin_service,
+    get_menu_service,
+    get_order_service
 )
 from checkout.models import models, schemas
 
@@ -88,7 +91,7 @@ class TestMenuService:
             ),
         ]
 
-    @patch("checkout.service.service.repository.get_categories")
+    @patch("checkout.repository.repository.get_categories")
     def test_get_categories_success(
         self, mock_get_categories, menu_service, sample_categories
     ):
@@ -102,7 +105,7 @@ class TestMenuService:
         assert result[1].name == "Drinks"
         mock_get_categories.assert_called_once_with(menu_service.db)
 
-    @patch("checkout.service.service.repository.get_categories")
+    @patch("checkout.repository.repository.get_categories")
     def test_get_categories_empty(self, mock_get_categories, menu_service):
         """Test category retrieval when no categories exist"""
         mock_get_categories.return_value = []
@@ -112,7 +115,7 @@ class TestMenuService:
         assert len(result) == 0
         mock_get_categories.assert_called_once_with(menu_service.db)
 
-    @patch("checkout.service.service.repository.get_categories")
+    @patch("checkout.repository.repository.get_categories")
     def test_get_categories_database_error(self, mock_get_categories, menu_service):
         """Test category retrieval when database error occurs"""
         mock_get_categories.side_effect = Exception("Database connection failed")
@@ -120,8 +123,8 @@ class TestMenuService:
         with pytest.raises(Exception, match="Database connection failed"):
             menu_service.get_categories()
 
-    @patch("checkout.service.service.repository.get_items")
-    @patch("checkout.service.service.repository.get_categories")
+    @patch("checkout.repository.repository.get_items")
+    @patch("checkout.repository.repository.get_categories")
     def test_get_menu_success(
         self,
         mock_get_categories,
@@ -142,7 +145,7 @@ class TestMenuService:
         mock_get_categories.assert_called_once_with(menu_service.db)
         mock_get_items.assert_called_once_with(menu_service.db)
 
-    @patch("checkout.service.service.repository.get_items")
+    @patch("checkout.repository.repository.get_items")
     def test_get_items_all(self, mock_get_items, menu_service, sample_items):
         """Test getting all items"""
         mock_get_items.return_value = sample_items
@@ -152,7 +155,7 @@ class TestMenuService:
         assert len(result) == 3
         mock_get_items.assert_called_once_with(menu_service.db, category_id=None)
 
-    @patch("checkout.service.service.repository.get_items")
+    @patch("checkout.repository.repository.get_items")
     def test_get_items_by_category(self, mock_get_items, menu_service):
         """Test getting items by category"""
         category_items = [
@@ -179,7 +182,7 @@ class TestMenuService:
         assert all(item.category_id == 1 for item in result)
         mock_get_items.assert_called_once_with(menu_service.db, category_id=1)
 
-    @patch("checkout.service.service.repository.get_item_by_id")
+    @patch("checkout.repository.repository.get_item_by_id")
     def test_get_item_by_id_success(self, mock_get_item, menu_service, sample_items):
         """Test successful item retrieval by ID"""
         mock_get_item.return_value = sample_items[0]
@@ -190,7 +193,7 @@ class TestMenuService:
         assert result.name == "Classic Burger"
         mock_get_item.assert_called_once_with(menu_service.db, item_id=1)
 
-    @patch("checkout.service.service.repository.get_item_by_id")
+    @patch("checkout.repository.repository.get_item_by_id")
     def test_get_item_by_id_not_found(self, mock_get_item, menu_service):
         """Test item retrieval when item doesn't exist"""
         mock_get_item.return_value = None
@@ -201,7 +204,7 @@ class TestMenuService:
         assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
         assert exc_info.value.detail == "Item not found"
 
-    @patch("checkout.service.service.repository.get_item_by_id")
+    @patch("checkout.repository.repository.get_item_by_id")
     def test_get_item_by_id_database_error(self, mock_get_item, menu_service):
         """Test item retrieval when database error occurs"""
         mock_get_item.side_effect = Exception("Database error")
@@ -253,9 +256,9 @@ class TestOrderService:
             ),
         }
 
-    @patch("checkout.service.service.FakePaymentService.process_payment")
-    @patch("checkout.service.service.repository.create_order")
-    @patch("checkout.service.service.repository.get_item_by_id")
+    @patch("checkout.service.FakePaymentService.process_payment")
+    @patch("checkout.repository.repository.create_order")
+    @patch("checkout.repository.repository.get_item_by_id")
     def test_create_order_success(
         self,
         mock_get_item,
@@ -283,7 +286,7 @@ class TestOrderService:
         mock_create_order.assert_called_once()
         mock_payment.assert_called_once()
 
-    @patch("checkout.service.service.repository.get_item_by_id")
+    @patch("checkout.repository.repository.get_item_by_id")
     def test_create_order_item_not_found(
         self, mock_get_item, order_service, sample_order_create
     ):
@@ -296,7 +299,7 @@ class TestOrderService:
         assert exc_info.value.status_code == status.HTTP_400_BAD_REQUEST
         assert "Item with ID 1 not found" in exc_info.value.detail
 
-    @patch("checkout.service.service.repository.get_item_by_id")
+    @patch("checkout.repository.repository.get_item_by_id")
     def test_create_order_total_mismatch(
         self, mock_get_item, order_service, sample_items
     ):
@@ -326,8 +329,8 @@ class TestOrderService:
         assert exc_info.value.status_code == status.HTTP_400_BAD_REQUEST
         assert "Total mismatch" in exc_info.value.detail
 
-    @patch("checkout.service.service.FakePaymentService.process_payment")
-    @patch("checkout.service.service.repository.get_item_by_id")
+    @patch("checkout.service.FakePaymentService.process_payment")
+    @patch("checkout.repository.repository.get_item_by_id")
     def test_create_order_payment_failed(
         self,
         mock_get_item,
@@ -350,7 +353,7 @@ class TestOrderService:
         assert exc_info.value.status_code == status.HTTP_402_PAYMENT_REQUIRED
         assert exc_info.value.detail == "Payment processing failed"
 
-    @patch("checkout.service.service.repository.get_order_by_id")
+    @patch("checkout.repository.repository.get_order_by_id")
     def test_get_order_by_id_success(self, mock_get_order, order_service):
         """Test successful order retrieval by ID"""
         sample_order = models.Order(id=1, total=25.98, payment_key="test_key")
@@ -362,7 +365,7 @@ class TestOrderService:
         assert result.total == 25.98
         mock_get_order.assert_called_once_with(order_service.db, order_id=1)
 
-    @patch("checkout.service.service.repository.get_order_by_id")
+    @patch("checkout.repository.repository.get_order_by_id")
     def test_get_order_by_id_not_found(self, mock_get_order, order_service):
         """Test order retrieval when order doesn't exist"""
         mock_get_order.return_value = None
@@ -385,7 +388,7 @@ class TestOrderService:
         }
 
         with patch(
-            "checkout.service.service.repository.get_item_by_id"
+            "checkout.repository.repository.get_item_by_id"
         ) as mock_get_item:
 
             def get_item_side_effect(db, item_id):
@@ -407,9 +410,9 @@ class TestOrderService:
             )
 
             with patch(
-                "checkout.service.service.FakePaymentService.process_payment",
+                "checkout.service.FakePaymentService.process_payment",
                 return_value=True,
-            ), patch("checkout.service.service.repository.create_order") as mock_create:
+            ), patch("checkout.repository.repository.create_order") as mock_create:
                 mock_create.return_value = models.Order(
                     id=1, total=1.00, payment_key="key"
                 )
@@ -436,8 +439,8 @@ class TestAdminService:
         """Sample existing categories"""
         return [models.Category(id=1, name="Existing Category", image="existing.jpg")]
 
-    @patch("checkout.service.service.repository.create_category")
-    @patch("checkout.service.service.repository.get_categories")
+    @patch("checkout.repository.repository.create_category")
+    @patch("checkout.repository.repository.get_categories")
     def test_create_category_success(
         self, mock_get_categories, mock_create_category, admin_service
     ):
@@ -453,7 +456,7 @@ class TestAdminService:
         assert result.image == "new.jpg"
         mock_create_category.assert_called_once()
 
-    @patch("checkout.service.service.repository.get_categories")
+    @patch("checkout.repository.repository.get_categories")
     def test_create_category_empty_name(self, mock_get_categories, admin_service):
         """Test category creation with empty name"""
         mock_get_categories.return_value = []
@@ -466,7 +469,7 @@ class TestAdminService:
         assert exc_info.value.status_code == status.HTTP_400_BAD_REQUEST
         assert "Category name is required" in exc_info.value.detail
 
-    @patch("checkout.service.service.repository.get_categories")
+    @patch("checkout.repository.repository.get_categories")
     def test_create_category_name_too_long(self, mock_get_categories, admin_service):
         """Test category creation with name too long"""
         mock_get_categories.return_value = []
@@ -480,7 +483,7 @@ class TestAdminService:
         assert exc_info.value.status_code == status.HTTP_400_BAD_REQUEST
         assert "cannot exceed 100 characters" in exc_info.value.detail
 
-    @patch("checkout.service.service.repository.get_categories")
+    @patch("checkout.repository.repository.get_categories")
     def test_create_category_duplicate_name(
         self, mock_get_categories, admin_service, sample_categories
     ):
@@ -497,7 +500,7 @@ class TestAdminService:
         assert exc_info.value.status_code == status.HTTP_400_BAD_REQUEST
         assert "already exists" in exc_info.value.detail
 
-    @patch("checkout.service.service.repository.get_categories")
+    @patch("checkout.repository.repository.get_categories")
     def test_create_category_duplicate_name_case_insensitive(
         self, mock_get_categories, admin_service, sample_categories
     ):
@@ -514,7 +517,7 @@ class TestAdminService:
         assert exc_info.value.status_code == status.HTTP_400_BAD_REQUEST
         assert "already exists" in exc_info.value.detail
 
-    @patch("checkout.service.service.repository.get_categories")
+    @patch("checkout.repository.repository.get_categories")
     def test_create_category_image_too_long(self, mock_get_categories, admin_service):
         """Test category creation with image filename too long"""
         mock_get_categories.return_value = []
@@ -528,9 +531,9 @@ class TestAdminService:
         assert exc_info.value.status_code == status.HTTP_400_BAD_REQUEST
         assert "cannot exceed 255 characters" in exc_info.value.detail
 
-    @patch("checkout.service.service.repository.create_item")
-    @patch("checkout.service.service.repository.get_items")
-    @patch("checkout.service.service.repository.get_categories")
+    @patch("checkout.repository.repository.create_item")
+    @patch("checkout.repository.repository.get_items")
+    @patch("checkout.repository.repository.get_categories")
     def test_create_item_success(
         self, mock_get_categories, mock_get_items, mock_create_item, admin_service
     ):
@@ -549,7 +552,7 @@ class TestAdminService:
         assert result.price == 12.99
         mock_create_item.assert_called_once()
 
-    @patch("checkout.service.service.repository.get_categories")
+    @patch("checkout.repository.repository.get_categories")
     def test_create_item_empty_name(self, mock_get_categories, admin_service):
         """Test item creation with empty name"""
         mock_get_categories.return_value = [models.Category(id=1, name="Test Category")]
@@ -562,7 +565,7 @@ class TestAdminService:
         assert exc_info.value.status_code == status.HTTP_400_BAD_REQUEST
         assert "Item name is required" in exc_info.value.detail
 
-    @patch("checkout.service.service.repository.get_categories")
+    @patch("checkout.repository.repository.get_categories")
     def test_create_item_category_not_found(self, mock_get_categories, admin_service):
         """Test item creation with non-existent category"""
         mock_get_categories.return_value = [models.Category(id=1, name="Test Category")]
@@ -575,8 +578,8 @@ class TestAdminService:
         assert exc_info.value.status_code == status.HTTP_400_BAD_REQUEST
         assert "Category with ID 999 does not exist" in exc_info.value.detail
 
-    @patch("checkout.service.service.repository.get_items")
-    @patch("checkout.service.service.repository.get_categories")
+    @patch("checkout.repository.repository.get_items")
+    @patch("checkout.repository.repository.get_categories")
     def test_create_item_duplicate_name_in_category(
         self, mock_get_categories, mock_get_items, admin_service
     ):
@@ -595,8 +598,8 @@ class TestAdminService:
         assert exc_info.value.status_code == status.HTTP_400_BAD_REQUEST
         assert "already exists in this category" in exc_info.value.detail
 
-    @patch("checkout.service.service.repository.get_items")
-    @patch("checkout.service.service.repository.get_categories")
+    @patch("checkout.repository.repository.get_items")
+    @patch("checkout.repository.repository.get_categories")
     def test_create_item_name_too_long(
         self, mock_get_categories, mock_get_items, admin_service
     ):
@@ -613,8 +616,8 @@ class TestAdminService:
         assert exc_info.value.status_code == status.HTTP_400_BAD_REQUEST
         assert "cannot exceed 200 characters" in exc_info.value.detail
 
-    @patch("checkout.service.service.repository.get_items")
-    @patch("checkout.service.service.repository.get_categories")
+    @patch("checkout.repository.repository.get_items")
+    @patch("checkout.repository.repository.get_categories")
     def test_create_item_image_id_too_long(
         self, mock_get_categories, mock_get_items, admin_service
     ):
@@ -633,9 +636,9 @@ class TestAdminService:
         assert exc_info.value.status_code == status.HTTP_400_BAD_REQUEST
         assert "Image ID cannot exceed 255 characters" in exc_info.value.detail
 
-    @patch("checkout.service.service.repository.create_item")
-    @patch("checkout.service.service.repository.get_items")
-    @patch("checkout.service.service.repository.get_categories")
+    @patch("checkout.repository.repository.create_item")
+    @patch("checkout.repository.repository.get_items")
+    @patch("checkout.repository.repository.get_categories")
     def test_create_item_database_error(
         self, mock_get_categories, mock_get_items, mock_create_item, admin_service
     ):
@@ -656,11 +659,9 @@ class TestAdminService:
 class TestServiceDependencies:
     """Test cases for service dependency functions"""
 
-    @patch("checkout.service.service.get_db")
+    @patch("checkout.repository.database.get_db")
     def test_get_menu_service(self, mock_get_db):
         """Test MenuService dependency injection"""
-        from checkout.service.service import get_menu_service
-
         mock_db = Mock()
         mock_get_db.return_value = mock_db
 
@@ -668,11 +669,9 @@ class TestServiceDependencies:
         assert isinstance(service, MenuService)
         assert service.db == mock_db
 
-    @patch("checkout.service.service.get_db")
+    @patch("checkout.repository.database.get_db")
     def test_get_order_service(self, mock_get_db):
         """Test OrderService dependency injection"""
-        from checkout.service.service import get_order_service
-
         mock_db = Mock()
         mock_get_db.return_value = mock_db
 
@@ -680,11 +679,9 @@ class TestServiceDependencies:
         assert isinstance(service, OrderService)
         assert service.db == mock_db
 
-    @patch("checkout.service.service.get_db")
+    @patch("checkout.repository.database.get_db")
     def test_get_admin_service(self, mock_get_db):
         """Test AdminService dependency injection"""
-        from checkout.service.service import get_admin_service
-
         mock_db = Mock()
         mock_get_db.return_value = mock_db
 

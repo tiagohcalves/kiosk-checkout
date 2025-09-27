@@ -7,7 +7,7 @@ import uuid
 
 import checkout.models.schemas as schemas
 from checkout.repository.database import create_tables
-from checkout.service.service import (
+from checkout.service import (
     MenuService,
     OrderService,
     AdminService,
