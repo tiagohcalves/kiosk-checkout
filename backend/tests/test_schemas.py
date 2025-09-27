@@ -9,12 +9,9 @@ class TestSchemas:
 
     def test_category_create_valid(self):
         """Test creating valid CategoryCreate schema"""
-        category_data = {
-            "name": "Test Category",
-            "image": "test.jpg"
-        }
+        category_data = {"name": "Test Category", "image": "test.jpg"}
         category = schemas.CategoryCreate(**category_data)
-        
+
         assert category.name == "Test Category"
         assert category.image == "test.jpg"
 
@@ -22,7 +19,7 @@ class TestSchemas:
         """Test creating CategoryCreate without optional image"""
         category_data = {"name": "Test Category"}
         category = schemas.CategoryCreate(**category_data)
-        
+
         assert category.name == "Test Category"
         assert category.image is None
 
@@ -32,70 +29,53 @@ class TestSchemas:
             "name": "Test Item",
             "price": 12.99,
             "image_id": "item.jpg",
-            "category_id": 1
+            "category_id": 1,
         }
         item = schemas.ItemCreate(**item_data)
-        
+
         assert item.name == "Test Item"
         assert item.price == 12.99
         assert item.category_id == 1
 
     def test_item_create_negative_price(self):
         """Test ItemCreate with negative price should fail"""
-        item_data = {
-            "name": "Test Item",
-            "price": -5.99,
-            "category_id": 1
-        }
-        
+        item_data = {"name": "Test Item", "price": -5.99, "category_id": 1}
+
         with pytest.raises(ValidationError) as exc_info:
             schemas.ItemCreate(**item_data)
-        
+
         assert "Input should be greater than 0" in str(exc_info.value)
 
     def test_item_create_zero_price(self):
         """Test ItemCreate with zero price should fail"""
-        item_data = {
-            "name": "Test Item",
-            "price": 0.0,
-            "category_id": 1
-        }
-        
+        item_data = {"name": "Test Item", "price": 0.0, "category_id": 1}
+
         with pytest.raises(ValidationError) as exc_info:
             schemas.ItemCreate(**item_data)
-        
+
         assert "Input should be greater than 0" in str(exc_info.value)
 
     def test_order_item_create_valid(self):
         """Test creating valid OrderItemCreate schema"""
-        order_item_data = {
-            "item_id": 1,
-            "quantity": 3
-        }
+        order_item_data = {"item_id": 1, "quantity": 3}
         order_item = schemas.OrderItemCreate(**order_item_data)
-        
+
         assert order_item.item_id == 1
         assert order_item.quantity == 3
 
     def test_order_item_create_zero_quantity(self):
         """Test OrderItemCreate with zero quantity should fail"""
-        order_item_data = {
-            "item_id": 1,
-            "quantity": 0
-        }
-        
+        order_item_data = {"item_id": 1, "quantity": 0}
+
         with pytest.raises(ValidationError) as exc_info:
             schemas.OrderItemCreate(**order_item_data)
-        
+
         assert "Input should be greater than 0" in str(exc_info.value)
 
     def test_order_item_create_negative_quantity(self):
         """Test OrderItemCreate with negative quantity should fail"""
-        order_item_data = {
-            "item_id": 1,
-            "quantity": -1
-        }
-        
+        order_item_data = {"item_id": 1, "quantity": -1}
+
         with pytest.raises(ValidationError) as exc_info:
             schemas.OrderItemCreate(**order_item_data)
 
@@ -112,11 +92,11 @@ class TestSchemas:
             "billing_address": {
                 "street": "123 Main St",
                 "city": "Anytown",
-                "zip": "12345"
-            }
+                "zip": "12345",
+            },
         }
         payment = schemas.PaymentData(**payment_data)
-        
+
         assert payment.card_number == "1234567890123456"
         assert payment.card_holder_name == "John Doe"
         assert payment.expiry_month == 12
@@ -130,9 +110,9 @@ class TestSchemas:
             "card_holder_name": "John Doe",
             "expiry_month": 13,  # Invalid
             "expiry_year": 2025,
-            "cvv": "123"
+            "cvv": "123",
         }
-        
+
         with pytest.raises(ValidationError):
             schemas.PaymentData(**payment_data)
 
@@ -143,9 +123,9 @@ class TestSchemas:
             "card_holder_name": "John Doe",
             "expiry_month": 0,  # Invalid
             "expiry_year": 2025,
-            "cvv": "123"
+            "cvv": "123",
         }
-        
+
         with pytest.raises(ValidationError):
             schemas.PaymentData(**payment_data)
 
@@ -156,30 +136,27 @@ class TestSchemas:
             "card_holder_name": "John Doe",
             "expiry_month": 12,
             "expiry_year": 2025,
-            "cvv": "123"
+            "cvv": "123",
         }
         payment = schemas.PaymentData(**payment_data)
-        
+
         assert payment.billing_address is None
 
     def test_order_create_valid(self):
         """Test creating valid OrderCreate schema"""
         order_data = {
-            "items": [
-                {"item_id": 1, "quantity": 2},
-                {"item_id": 2, "quantity": 1}
-            ],
+            "items": [{"item_id": 1, "quantity": 2}, {"item_id": 2, "quantity": 1}],
             "total": 25.98,
             "payment": {
                 "card_number": "1234567890123456",
                 "card_holder_name": "John Doe",
                 "expiry_month": 12,
                 "expiry_year": 2025,
-                "cvv": "123"
-            }
+                "cvv": "123",
+            },
         }
         order = schemas.OrderCreate(**order_data)
-        
+
         assert len(order.items) == 2
         assert order.total == 25.98
         assert order.payment.card_holder_name == "John Doe"
@@ -194,10 +171,10 @@ class TestSchemas:
                 "card_holder_name": "John Doe",
                 "expiry_month": 12,
                 "expiry_year": 2025,
-                "cvv": "123"
-            }
+                "cvv": "123",
+            },
         }
-        
+
         with pytest.raises(ValidationError) as exc_info:
             schemas.OrderCreate(**order_data)
 
@@ -213,10 +190,10 @@ class TestSchemas:
                 "card_holder_name": "John Doe",
                 "expiry_month": 12,
                 "expiry_year": 2025,
-                "cvv": "123"
-            }
+                "cvv": "123",
+            },
         }
-        
+
         with pytest.raises(ValidationError) as exc_info:
             schemas.OrderCreate(**order_data)
 
@@ -232,10 +209,10 @@ class TestSchemas:
                 "card_holder_name": "John Doe",
                 "expiry_month": 12,
                 "expiry_year": 2025,
-                "cvv": "123"
-            }
+                "cvv": "123",
+            },
         }
-        
+
         # This should be valid according to the schema (business logic validation happens elsewhere)
         order = schemas.OrderCreate(**order_data)
         assert len(order.items) == 0
@@ -243,9 +220,7 @@ class TestSchemas:
     def test_menu_response_valid(self):
         """Test creating valid MenuResponse schema"""
         menu_data = {
-            "categories": [
-                {"id": 1, "name": "Category 1", "image": "cat1.jpg"}
-            ],
+            "categories": [{"id": 1, "name": "Category 1", "image": "cat1.jpg"}],
             "items": [
                 {
                     "id": 1,
@@ -254,10 +229,10 @@ class TestSchemas:
                     "category_id": 1,
                     "image_id": "item1.jpg",
                 }
-            ]
+            ],
         }
         menu = schemas.MenuResponse(**menu_data)
-        
+
         assert len(menu.categories) == 1
         assert len(menu.items) == 1
         assert menu.categories[0].name == "Category 1"
@@ -267,18 +242,14 @@ class TestSchemas:
         """Test schema serialization to dict"""
         category = schemas.CategoryCreate(name="Test", image="test.jpg")
         category_dict = category.dict()
-        
+
         assert category_dict == {"name": "Test", "image": "test.jpg"}
 
     def test_schema_json_serialization(self):
         """Test schema JSON serialization"""
-        item_data = {
-            "name": "Test Item",
-            "price": 12.99,
-            "category_id": 1
-        }
+        item_data = {"name": "Test Item", "price": 12.99, "category_id": 1}
         item = schemas.ItemCreate(**item_data)
         json_str = item.json()
-        
+
         assert "Test Item" in json_str
         assert "12.99" in json_str

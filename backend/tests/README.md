@@ -199,7 +199,6 @@ When adding new features:
 ### Test Framework
 - **pytest**: Main testing framework
 - **pytest-asyncio**: Async test support
-- **httpx**: HTTP client for API testing
 
 ### Database Testing  
 - **SQLAlchemy**: ORM with test database support
