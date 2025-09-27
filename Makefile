@@ -17,3 +17,6 @@ run-backend: venv
 
 run-frontend:
 	cd frontend && npm start
+
+test-backend: venv
+	cd backend && PYTHONPATH=. pytest tests/ -v

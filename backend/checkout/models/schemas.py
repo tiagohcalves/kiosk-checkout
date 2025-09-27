@@ -23,7 +23,6 @@ class ItemBase(BaseModel):
     name: str
     price: float = Field(gt=0, description="Price must be greater than 0")
     image_id: Optional[str] = None
-    description: Optional[str] = None
     category_id: int
 
 

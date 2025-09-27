@@ -51,9 +51,6 @@ const MenuItem = ({ item }) => {
       <div className="menu-item-content">
         <h3 className="menu-item-name">{item.name}</h3>
         <p className="menu-item-price">${item.price.toFixed(2)}</p>
-        {item.description && (
-          <p className="menu-item-description">{item.description}</p>
-        )}
       </div>
       
       <div className="menu-item-actions">

@@ -48,7 +48,7 @@ API documentation at `http://localhost:8000/docs`
 ## Database Models
 
 - **Category**: Menu categories (appetizers, mains, etc.)
-- **Item**: Menu items with prices and descriptions
+- **Item**: Menu items with prices
 - **Order**: Customer orders with totals and payment info
 - **OrderItem**: Individual items within an order
 

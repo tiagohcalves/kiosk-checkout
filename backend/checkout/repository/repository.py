@@ -34,7 +34,7 @@ def create_order(db: Session, order: schemas.OrderCreate) -> models.Order:
         ).hexdigest()[:16]
         
         # Store payment data as JSON (in real app, encrypt this)
-        payment_data = order.payment.dict()
+        payment_data = order.payment.model_dump()
         # Mask sensitive data for storage
         payment_data["card_number"] = "**** **** **** " + payment_data["card_number"][-4:]
         
@@ -90,7 +90,6 @@ def create_item(db: Session, item: schemas.ItemCreate) -> models.Item:
         name=item.name,
         price=item.price,
         image_id=item.image_id,
-        description=item.description,
         category_id=item.category_id
     )
     db.add(db_item)

@@ -53,7 +53,7 @@ const CheckoutPage = () => {
     const errors = [];
     
     if (!formData.cardNumber || formData.cardNumber.length < 16) {
-      errors.push('Please enter a valid card number');
+      errors.push('Please enter a valid card number (16 digits)');
     }
     if (!formData.cardHolderName.trim()) {
       errors.push('Please enter the card holder name');

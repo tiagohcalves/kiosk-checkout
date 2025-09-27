@@ -26,7 +26,6 @@ class Item(Base):
     name = Column(String, index=True)
     price = Column(Float)
     image_id = Column(String, nullable=True)
-    description = Column(Text, nullable=True)
     
     # Relationship with category
     category = relationship("Category", back_populates="items")

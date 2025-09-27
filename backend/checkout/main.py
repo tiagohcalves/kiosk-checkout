@@ -12,7 +12,7 @@ create_tables()
 
 app = FastAPI(
     title="Restaurant Checkout API",
-    description="A simple restaurant checkout system API",
+    description="A simple kiosk checkout system API",
     version="1.0.0"
 )
 
@@ -92,6 +92,8 @@ async def create_order(order: schemas.OrderCreate, db: Session = Depends(get_db)
         db_order = repository.create_order(db=db, order=order)
         return db_order
         
+    except HTTPException as e:
+        raise e
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -121,11 +123,43 @@ async def get_order(order_id: int, db: Session = Depends(get_db)):
 async def create_category(category: schemas.CategoryCreate, db: Session = Depends(get_db)):
     """Create a new category (admin only)"""
     try:
+        # Basic validation
+        if not category.name or not category.name.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Category name is required and cannot be empty"
+            )
+        
+        # Check name length
+        if len(category.name.strip()) > 100:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Category name cannot exceed 100 characters"
+            )
+        
+        # Check for duplicate category names
+        existing_categories = repository.get_categories(db)
+        if any(cat.name.lower() == category.name.strip().lower() for cat in existing_categories):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A category with this name already exists"
+            )
+        
+        # Validate image field if provided
+        if category.image and len(category.image) > 255:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Image filename cannot exceed 255 characters"
+            )
+        
         return repository.create_category(db=db, category=category)
+        
+    except HTTPException as e:
+        raise e
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Category creation failed"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while creating the category"
         )
 
 
@@ -133,11 +167,57 @@ async def create_category(category: schemas.CategoryCreate, db: Session = Depend
 async def create_item(item: schemas.ItemCreate, db: Session = Depends(get_db)):
     """Create a new menu item (admin only)"""
     try:
+        # Basic validation
+        if not item.name or not item.name.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Item name is required and cannot be empty"
+            )
+        
+        # Check name length
+        if len(item.name.strip()) > 200:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Item name cannot exceed 200 characters"
+            )
+        
+        # Validate price
+        if item.price <= 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Price must be greater than 0"
+            )
+        
+        # Validate category exists
+        categories = repository.get_categories(db)
+        if not any(cat.id == item.category_id for cat in categories):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Category with ID {item.category_id} does not exist"
+            )
+        
+        # Check for duplicate item names within the same category
+        existing_items = repository.get_items(db, category_id=item.category_id)
+        if any(existing_item.name.lower() == item.name.strip().lower() for existing_item in existing_items):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="An item with this name already exists in this category"
+            )
+        
+        if item.image_id and len(item.image_id) > 255:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Image ID cannot exceed 255 characters"
+            )
+        
         return repository.create_item(db=db, item=item)
+        
+    except HTTPException as e:
+        raise e
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Item creation failed"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while creating the item"
         )
 
 
