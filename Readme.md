@@ -1,4 +1,4 @@
-# Mashgin Kiosk Checkout System
+# Kiosk Checkout System
 
 This project is a full-stack kiosk checkout system, featuring a React frontend and a Python FastAPI backend. It's designed to simulate a self-service kiosk where customers can browse a menu, add items to their cart, and "pay" for their order.
 
