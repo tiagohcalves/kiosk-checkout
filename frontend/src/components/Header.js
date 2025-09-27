@@ -15,7 +15,12 @@ const Header = () => {
     <header className="header">
       <div className="header-content">
         <Link to="/" className="logo">
-          <h1>🍽️ Mashgin Kiosk</h1>
+          <h1><img
+            src="/mashgin-logo.jpg"
+            alt="Mashgin Logo"
+            className="mashgin-logo"
+            height={40}
+          /> Mashgin Kiosk</h1>
         </Link>
         
         <nav className="nav">

@@ -2,34 +2,31 @@
 setup:
 	python3 -m venv backend/venv
 	pip install -r backend/requirements.txt
-
-venv:
-	. backend/venv/bin/activate
 	
-seed: venv
-	cd backend && PYTHONPATH=. python3 checkout/repository/seed.py seed_data.json
+seed:
+	cd backend && PYTHONPATH=. venv/bin/python3 checkout/repository/seed.py seed_data.json
 
 dbshell:
 	sqlite3 backend/mashgin.db
 
-run-backend: venv
-	cd backend && PYTHONPATH=. uvicorn checkout.main:app --reload
+run-backend:
+	cd backend && PYTHONPATH=. venv/bin/uvicorn checkout.main:app --reload
 
 run-frontend:
 	cd frontend && npm start
 
-test-backend: venv
-	cd backend && PYTHONPATH=. pytest tests/ -v
+test-backend:
+	cd backend && PYTHONPATH=. venv/bin/pytest tests/ -v
 
-lint-backend: venv
-	cd backend && black checkout tests
+lint-backend:
+	cd backend && venv/bin/black checkout tests
 
 # Docker commands
 docker-build:
 	docker compose build
 
 docker-up:
-	docker compose up -d
+	docker compose up
 
 docker-up-with-seed:
 	docker compose up -d
