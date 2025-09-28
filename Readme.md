@@ -2,7 +2,15 @@
 
 This project is a full-stack kiosk checkout system, featuring a React frontend and a Python FastAPI backend. It's designed to simulate a self-service kiosk where customers can browse a menu, add items to their cart, and "pay" for their order.
 
-![alt text](design.png)
+![design](design.png)
+
+
+## Screenshots
+
+![page 1](page_1.png)
+![page 2](page_2.png)
+![page 3](page_3.png)
+
 
 ## Features
 
